@@ -34,6 +34,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks //MonoBehaviour + photonne
         Join.interactable = false;
 
         PhotonNetwork.GameVersion = gameVer;
+        PhotonNetwork.AutomaticallySyncScene = true;
 
     }
     //버튼 이벤트별 함수------------------------------------------------------------------------------------------------------------------------------------------------------

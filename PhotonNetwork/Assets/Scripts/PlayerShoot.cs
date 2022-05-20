@@ -21,7 +21,7 @@ public class PlayerShoot : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
-        if (playerInput.fire == 1)
+        if (playerInput.fire == 1 && BulletManager.instance.BULLET > 0)
         {
             if (firePress == false)
             {

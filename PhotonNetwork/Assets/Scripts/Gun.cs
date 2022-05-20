@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class Gun : MonoBehaviour
@@ -8,13 +9,9 @@ public class Gun : MonoBehaviour
     public AudioClip shootSound;
     public AudioClip reloadSound;
 
-    LineRenderer bulletLineRenderer;
-    float fireDist = 50f;
+    public Transform bulletParent;
 
-    public float damage = 25;
-    public int armor_remain = 100;
-    public int mag_capacity = 25;
-    public int magArmo; // 현재 탄창에 있는 총알 갯수
+    float fireDist = 50f;
 
     public enum State
     {
@@ -26,14 +23,13 @@ public class Gun : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        magArmo = mag_capacity;
         fireSoundSource = GetComponent<AudioSource>();
-        bulletLineRenderer = fireTransform.GetComponent<LineRenderer>();
-        bulletLineRenderer.positionCount = 2;
-        bulletLineRenderer.enabled = false;
         state = State.Ready;
+    }
 
-
+    private void Start()
+    {
+        ObjectPool.instance.CreateInstance("Bullet", bulletParent, BulletManager.instance.BULLET);
     }
 
     public void Fire()
@@ -45,41 +41,41 @@ public class Gun : MonoBehaviour
     }
 
     bool IsShooting = false;
+    [PunRPC]
     void Shot()
     {
         Ray ray = new Ray(fireTransform.position, fireTransform.forward);
         RaycastHit hitInfo;
         bool canShot = Physics.Raycast(ray, out hitInfo, fireDist);
 
-        bulletLineRenderer.SetPosition(0, ray.origin);
+        GameObject bullet = ObjectPool.instance.GetInactiveBulletNew("Bullet");
+        bullet.transform.position = fireTransform.position;
+        bullet.transform.forward = fireTransform.forward;
 
         if (canShot)
         {
-            bulletLineRenderer.SetPosition(1, hitInfo.point);
-            if (!IsShooting)
-            {
-                StartCoroutine(IEShotEffect());
-            }
+
         }
         else
         {
-            bulletLineRenderer.SetPosition(1, ray.origin + ray.direction * 50);
-            if (!IsShooting)
-            {
-                StartCoroutine(IEShotEffect());
-            }
+
+        }
+
+        if (!IsShooting)
+        {
+            StartCoroutine(IEShotEffect(bullet));
         }
     }
 
-    IEnumerator IEShotEffect()
+    IEnumerator IEShotEffect(GameObject bullet)
     {
-        magArmo--;
+        BulletManager.instance.BULLET--;
         IsShooting = true;
         fireSoundSource.PlayOneShot(shootSound);
-        bulletLineRenderer.enabled = true;
         yield return new WaitForSeconds(0.5f);
-        bulletLineRenderer.enabled = false;
         IsShooting = false;
+        yield return new WaitForSeconds(0.5f);
+        ObjectPool.instance.AddInactiveList(bullet);
     }
 
     public void reload()
@@ -98,16 +94,17 @@ public class Gun : MonoBehaviour
         yield return new WaitForSeconds(0.05f); // 해당 초가 지나면
                                                 // 탄창을 채운다.
 
-        // public int armor_remain = 100; // 총 탄환
+        // public int total_remain = 100; // 총 탄환
         // public int mag_capacity = 25; // 탄창당 탄환
         // 15               //25        10
-        int fill_armo = mag_capacity - magArmo; // 탄창개수 - 현재 총알갯수 : 보충할 개수
-        if (armor_remain < fill_armo)
+        int fill_armo = BulletManager.instance.mag_capacity - BulletManager.instance.magArmo; // 탄창개수 - 현재 총알갯수 : 보충할 개수
+        if (BulletManager.instance.total_remain < fill_armo)
         {
-            fill_armo = armor_remain;
+            fill_armo = BulletManager.instance.total_remain;
         }
-        magArmo += fill_armo; // 갯수만큼 보충하고
-        armor_remain -= fill_armo; // 총갯수에서 뺀다
+
+        BulletManager.instance.total_remain -= fill_armo; // 총갯수에서 뺀다
+        BulletManager.instance.BULLET += fill_armo; // 갯수만큼 보충하고
 
         state = State.Ready;
         // 탄창을 채우는 부분

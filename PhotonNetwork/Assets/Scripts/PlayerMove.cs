@@ -51,25 +51,27 @@ public class PlayerMove : MonoBehaviourPunCallbacks
         if (!photonView.IsMine) { return; }
 
         MoveChar();
-        RotChar();
+        // RotChar();
     }
 
     Vector3 dir;
+    [PunRPC]
     void MoveChar()
     {
-        dir = new Vector3(0, 0, playerInput.move);
+        dir = new Vector3(playerInput.moveH, 0, playerInput.moveV);
         dir = Camera.main.transform.TransformDirection(dir);
-        dir.Normalize();
-
-        anim.SetFloat(speedHash, playerInput.move);
+        dir.y = 0;
+        anim.SetFloat(speedHash, Vector3.ClampMagnitude(dir, 1).magnitude);
         velocity = dir * speed;
 
+        transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
         cc.SimpleMove(velocity);
     }
-    void RotChar()
-    {
-        dir = Camera.main.transform.forward;
-        dir.y = 0;
-        transform.forward = Vector3.Lerp(transform.forward, dir, rotSpeed);
-    }
+    // [PunRPC]
+    // void RotChar()
+    // {
+    //     dir = Camera.main.transform.forward;
+    //     dir.y = 0;
+    //     transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
+    // }
 }

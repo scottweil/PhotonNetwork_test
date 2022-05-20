@@ -10,7 +10,8 @@ using Photon.Realtime;
 
 public class PlayerInput : MonoBehaviourPunCallbacks
 {
-    public float move { get; private set; }
+    public float moveV { get; private set; }
+    public float moveH { get; private set; }
     public float rotate { get; private set; }
     public float fire { get; private set; }
     public float reload { get; private set; }
@@ -21,7 +22,8 @@ public class PlayerInput : MonoBehaviourPunCallbacks
         if (!photonView.IsMine) { return; }
 #if PC_Platform
 
-        move = Input.GetAxis("Vertical");
+        moveV = Input.GetAxis("Vertical");
+        moveH = Input.GetAxis("Horizontal");
         rotate = Input.GetAxis("Mouse X");
         fire = Input.GetAxisRaw("Fire1");
         reload = Input.GetAxisRaw("Fire2");

@@ -59,7 +59,6 @@ public class ObjectPool : MonoBehaviour
                 inActiveList[key].Add(obj);
             }
         }
-
     }
 
     public GameObject GetInactiveBulletNew(String key)
