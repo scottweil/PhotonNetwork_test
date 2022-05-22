@@ -13,6 +13,8 @@ public class Gun : MonoBehaviour
 
     float fireDist = 50f;
 
+    private PhotonView pv;
+
     public enum State
     {
         Ready, Empty, Reloading
@@ -29,6 +31,7 @@ public class Gun : MonoBehaviour
 
     private void Start()
     {
+        pv = GetComponentInParent<PhotonView>();
         ObjectPool.instance.CreateInstance("Bullet", bulletParent, BulletManager.instance.BULLET);
     }
 
@@ -37,10 +40,12 @@ public class Gun : MonoBehaviour
         if (state == State.Ready)
         {
             Shot();
+            pv.RPC("Shot", RpcTarget.All, null);
         }
     }
 
     bool IsShooting = false;
+
     [PunRPC]
     void Shot()
     {

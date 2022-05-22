@@ -5,7 +5,7 @@ using UnityEngine;
 using Cinemachine;
 using Photon.Pun;
 using Photon.Realtime;
-public class PlayerMove : MonoBehaviourPunCallbacks
+public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
 {
     public float speed = 5f;
     CharacterController cc;
@@ -18,11 +18,14 @@ public class PlayerMove : MonoBehaviourPunCallbacks
     int speedHash;
 
     Vector3 velocity;
-
-    Cinemachine.CinemachineFreeLook CM_FreeLook;
     CinemachineFreeLook CM_freeLook;
 
     public Transform CM_LookAt;
+
+    //수신된 위치와 회전값을 저장할 변수
+    private Vector3 receivePos;
+    private Quaternion receiveRot;
+    public float damping = 10.0f;
 
     private void Awake()
     {
@@ -36,7 +39,7 @@ public class PlayerMove : MonoBehaviourPunCallbacks
 
         speedHash = Animator.StringToHash("Speed");
 
-        CM_freeLook = Camera.main.transform.GetComponentInChildren<CinemachineFreeLook>();
+        CM_freeLook = GameObject.FindObjectOfType<CinemachineFreeLook>();
 
         if (photonView.IsMine)
         {
@@ -48,14 +51,25 @@ public class PlayerMove : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine) { return; }
+        if (photonView.IsMine)
+        {
+            MoveChar();
 
-        MoveChar();
+        }
+        else
+        {
+            //수신된 좌표로 보간한 이동 처리
+            transform.position = Vector3.Lerp(transform.position, receivePos, Time.deltaTime * damping);
+
+            //수신된 회전값으로 보간한 회전 처리
+            transform.rotation = Quaternion.Slerp(transform.rotation, receiveRot, Time.deltaTime * damping);
+        }
+
+
         // RotChar();
     }
 
     Vector3 dir;
-    [PunRPC]
     void MoveChar()
     {
         dir = new Vector3(playerInput.moveH, 0, playerInput.moveV);
@@ -74,4 +88,20 @@ public class PlayerMove : MonoBehaviourPunCallbacks
     //     dir.y = 0;
     //     transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
     // }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        //IsWriting이 true이면 데이터를 전송
+        //false면 수신
+        if (stream.IsWriting)
+        {
+            stream.SendNext(transform.position);
+            stream.SendNext(transform.rotation);
+        }
+        else
+        {
+            receivePos = (Vector3)stream.ReceiveNext();
+            receiveRot = (Quaternion)stream.ReceiveNext();
+        }
+    }
 }
