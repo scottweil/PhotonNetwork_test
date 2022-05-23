@@ -10,9 +10,10 @@ public class BulletManager : MonoBehaviour
     private void Awake()
     {
         BulletManager.instance = this;
+        BULLET = mag_capacity;
     }
 
-    
+
     public int total_remain = 100;
     public int mag_capacity = 25;
     public int magArmo; // 현재 탄창에 있는 총알 갯수
@@ -28,9 +29,4 @@ public class BulletManager : MonoBehaviour
     }
 
     public TMP_Text bulletText;
-
-    void Start()
-    {
-        BULLET = mag_capacity;
-    }
 }
