@@ -9,7 +9,7 @@ public class Gun : MonoBehaviour
     public AudioClip shootSound;
     public AudioClip reloadSound;
 
-    public Transform bulletParent;
+    Transform bulletParent;
 
     float fireDist = 50f;
 
@@ -22,9 +22,10 @@ public class Gun : MonoBehaviour
     public State state { get; private set; }
     public Transform fireTransform;
 
-    // Start is called before the first frame update
     void Awake()
     {
+        // fireTransform = GameObject.Find("Gun").transform;s
+        bulletParent = GameObject.Find("BulletParent").transform;
         fireSoundSource = GetComponent<AudioSource>();
         state = State.Ready;
     }
@@ -40,7 +41,7 @@ public class Gun : MonoBehaviour
         if (state == State.Ready)
         {
             Shot();
-            pv.RPC("Shot", RpcTarget.All, null);
+            pv.RPC("Shot", RpcTarget.All);
         }
     }
 

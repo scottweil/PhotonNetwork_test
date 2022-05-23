@@ -15,7 +15,8 @@ public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
     PlayerInput playerInput; //내 이동관련 입력객체
 
     Animator anim;
-    int speedHash;
+    int HORIZONTAL;
+    int VERTICAL;
 
     Vector3 velocity;
     CinemachineFreeLook CM_freeLook;
@@ -37,7 +38,8 @@ public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
         cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
 
-        speedHash = Animator.StringToHash("Speed");
+        HORIZONTAL = Animator.StringToHash("Horizontal");
+        VERTICAL = Animator.StringToHash("Vertical");
 
         CM_freeLook = GameObject.FindObjectOfType<CinemachineFreeLook>();
 
@@ -51,8 +53,11 @@ public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
     // Update is called once per frame
     void Update()
     {
+
+
         if (photonView.IsMine)
         {
+
             MoveChar();
 
         }
@@ -66,28 +71,41 @@ public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
         }
 
 
-        // RotChar();
+
     }
 
     Vector3 dir;
     void MoveChar()
     {
         dir = new Vector3(playerInput.moveH, 0, playerInput.moveV);
+        anim.SetFloat(HORIZONTAL, dir.x);
+        anim.SetFloat(VERTICAL, dir.z);
+
         dir = Camera.main.transform.TransformDirection(dir);
         dir.y = 0;
-        anim.SetFloat(speedHash, Vector3.ClampMagnitude(dir, 1).magnitude);
+
+
         velocity = dir * speed;
 
-        transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
+        RotChar();
+
         cc.SimpleMove(velocity);
     }
-    // [PunRPC]
-    // void RotChar()
-    // {
-    //     dir = Camera.main.transform.forward;
-    //     dir.y = 0;
-    //     transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
-    // }
+
+    [PunRPC]
+    void RotChar()
+    {
+        if (Input.GetKey("left shift"))
+        {
+            transform.forward += Vector3.Lerp(transform.forward, dir, rotSpeed);
+        }
+        else
+        {
+            Vector3 rotation = new Vector3(Camera.main.transform.forward.x, 0, Camera.main.transform.forward.z);
+            transform.forward += Vector3.Lerp(transform.forward, rotation, rotSpeed);
+        }
+
+    }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {

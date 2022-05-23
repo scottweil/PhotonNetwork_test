@@ -66,6 +66,7 @@ public class ObjectPool : MonoBehaviour
         //해당 key가 존재하지 않는다면
         if (false == inActiveList.ContainsKey(key))
         {
+            print("sdfsdf");
             return null;
         }
 
