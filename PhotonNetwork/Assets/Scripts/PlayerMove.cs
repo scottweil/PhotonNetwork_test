@@ -34,7 +34,7 @@ public class PlayerMove : MonoBehaviourPunCallbacks, IPunObservable
     }
     void Start()
     {
-        anim = GetComponentInChildren<Animator>();
+        anim = GetComponent<Animator>();
         cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
 

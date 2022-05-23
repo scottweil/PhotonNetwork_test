@@ -15,7 +15,7 @@ public class PlayerShoot : MonoBehaviourPun
     {
         firePress = reloadPress = false;
         playerInput = GetComponent<PlayerInput>();
-        anim = GetComponentInChildren<Animator>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame

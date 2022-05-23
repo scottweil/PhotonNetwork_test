@@ -63,10 +63,10 @@ public class Enemy : MonoBehaviour
         if (isAttacked)
         {
             enemyHP_bar_back.value = Mathf.Lerp(enemyHP_bar_back.value, enemyHP_bar_front.value, Time.deltaTime * 10f);
-            if (enemyHP_bar_back.value < enemyHP_bar_front.value * 1.1f)
+            if (enemyHP_bar_back.value < enemyHP_bar_front.value * 1.01f)
             {
                 isAttacked = false;
-                enemyHP_bar_back.value = enemyHP_bar_front.value;
+                enemyHP_bar_back.value = ENEMY_HP;
             }
         }
     }

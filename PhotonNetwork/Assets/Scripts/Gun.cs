@@ -24,7 +24,6 @@ public class Gun : MonoBehaviour
 
     void Awake()
     {
-        // fireTransform = GameObject.Find("Gun").transform;s
         bulletParent = GameObject.Find("BulletParent").transform;
         fireSoundSource = GetComponent<AudioSource>();
         state = State.Ready;
@@ -32,7 +31,7 @@ public class Gun : MonoBehaviour
 
     private void Start()
     {
-        pv = GetComponentInParent<PhotonView>();
+        pv = GetComponent<PhotonView>();
         ObjectPool.instance.CreateInstance("Bullet", bulletParent, BulletManager.instance.BULLET);
     }
 
@@ -40,8 +39,8 @@ public class Gun : MonoBehaviour
     {
         if (state == State.Ready)
         {
-            Shot();
-            pv.RPC("Shot", RpcTarget.All);
+            // Shot();
+            pv.RPC("Shot", RpcTarget.All, null);
         }
     }
 
